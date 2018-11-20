@@ -1,6 +1,7 @@
 # Cucumber 'vanilla' plus Citrus
 
-This project illustrates how to add Citrus cucumber support to an existing cucumber project.
+This project illustrates how to add [Citrus-Cucumber support](http://citrusframework.org/citrus/reference/html/index.html#cucumber)
+to an existing [Cucumber](https://cucumber.io) project.
 
 **Project structure**  
 The package `hellocucumber` contains the test runner as well as two additional packages. `hellocucumber.cucumber` contains
