@@ -18,6 +18,7 @@ package hellocucumber.citrus;
 
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.dsl.design.TestDesigner;
+import com.consol.citrus.dsl.runner.TestRunner;
 import com.consol.citrus.message.MessageType;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -32,63 +33,65 @@ public class TodoSteps {
 
     /** Test designer filled with actions by step definitions */
     @CitrusResource
-    private TestDesigner designer;
+    private TestRunner runner;
 
     @Given("^Todo list is empty$")
     public void empty_todos() {
-        designer.http()
-            .client("todoListClient")
-            .send()
-            .delete("/api/todolist");
+        runner.http(http -> http
+                .client("todoListClient")
+                .send()
+                .delete("/api/todolist"));
 
-        designer.http()
-            .client("todoListClient")
-            .receive()
-            .response(HttpStatus.OK);
+        runner.http(http -> http
+                .client("todoListClient")
+                .receive()
+                .response(HttpStatus.OK));
     }
 
     @When("^(?:I|user) adds? entry \"([^\"]*)\"$")
-    public void add_entry(String todoName) {
-        designer.http()
-            .client("todoListClient")
-            .send()
-            .post("/todolist")
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .payload("title=" + todoName);
+    public void add_entry(final String todoName) {
+        runner.http(http -> http
+                .client("todoListClient")
+                .send()
+                .post("/todolist")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .payload("title=" + todoName));
 
-        designer.http()
-            .client("todoListClient")
-            .receive()
-            .response(HttpStatus.FOUND);
+        runner.http(http -> http
+                .client("todoListClient")
+                .receive()
+                .response(HttpStatus.FOUND));
     }
 
     @When("^(?:I|user) removes? entry \"([^\"]*)\"$")
-    public void remove_entry(String todoName) throws UnsupportedEncodingException {
-        designer.http()
+    public void remove_entry(final String todoName) throws UnsupportedEncodingException {
+
+        final String encodedTodoName = URLEncoder.encode(todoName, "UTF-8");
+        runner.http(http -> http
                 .client("todoListClient")
                 .send()
-                .delete("/api/todo?title=" + URLEncoder.encode(todoName, "UTF-8"));
+                .delete("/api/todo?title=" + encodedTodoName));
 
-        designer.http()
+        runner.http(http -> http
                 .client("todoListClient")
                 .receive()
                 .response(HttpStatus.OK)
-                .messageType(MessageType.PLAINTEXT);
+                .messageType(MessageType.PLAINTEXT));
     }
 
     @Then("^(?:the )?number of todo entries should be (\\d+)$")
-    public void verify_todos(int todoCnt) {
-        designer.http()
-            .client("todoListClient")
-            .send()
-            .get("/api/todolist/count");
+    public void verify_todos(final int todoCnt) {
+        runner.http(http -> http
+                .client("todoListClient")
+                .send()
+                .get("/api/todolist/count"));
 
-        designer.http()
-            .client("todoListClient")
-            .receive()
-            .response(HttpStatus.OK)
-            .messageType(MessageType.PLAINTEXT)
-            .payload(String.valueOf(todoCnt));
+        runner.http(http -> http
+                .client("todoListClient")
+                .receive()
+                .response(HttpStatus.OK)
+                .messageType(MessageType.PLAINTEXT)
+                .payload(String.valueOf(todoCnt)));
     }
 
     @Then("^(?:the )?todo list should be empty$")
